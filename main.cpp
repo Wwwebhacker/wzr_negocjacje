@@ -151,7 +151,7 @@ DWORD WINAPI ReceiveThreadFunction(void* ptr)
 		}
 		case ITEM_TAKING:            // frame informuj¹ca, ¿e ktoœ wzi¹³ przedmiot o podanym numerze
 		{
-			// TODO here you should send money/fuel to your pall
+			// TODO here you should send money/fuel to your pal
 			state = frame.state;
 			if ((frame.item_number < terrain.number_of_items) && (frame.iID != my_vehicle->iID))
 			{
