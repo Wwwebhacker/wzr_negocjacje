@@ -60,6 +60,11 @@ enum frame_types {
 	OBJECT_STATE, ITEM_TAKING, ITEM_RENEWAL, COLLISION, TRANSFER, OFFER, ACCEPT_OFFER
 };
 
+struct Offer {
+	float money = 0.0f;
+	float fuel = 0.0f;
+}myOffer, othersOffer, acceptedOffer;
+
 enum transfer_types { MONEY, FUEL };
 
 struct Frame
@@ -237,10 +242,6 @@ void InteractionInitialisation()
 
 }
 
-struct Offer {
-	float money = 0.0f;
-	float fuel = 0.0f;
-}myOffer, othersOffer, acceptedOffer;
 
 // *****************************************************************
 // ****    Wszystko co trzeba zrobiæ w ka¿dym cyklu dzia³ania 
@@ -844,6 +845,17 @@ void MessagesHandling(UINT message_type, WPARAM wParam, LPARAM lParam)
 		case '3': {
 			acceptedOffer.fuel = othersOffer.fuel;
 			acceptedOffer.money = othersOffer.money;
+			for (map<int, MovableObject*>::iterator it = network_vehicles.begin(); it != network_vehicles.end(); ++it)
+			{
+				if (it->second)
+				{
+					MovableObject* ob = it->second;
+					if (ob->if_selected) {
+						sendAccept(ob->iID, acceptedOffer.fuel, acceptedOffer.money);
+					}
+
+				}
+			}
 		}
 		} // switch po klawiszach
 		
