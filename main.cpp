@@ -189,7 +189,17 @@ DWORD WINAPI ReceiveThreadFunction(void* ptr)
 			{
 				othersOffer.fuel = frame.fuel_offer;
 				othersOffer.money = frame.money_offer;
+				for (map<int, MovableObject*>::iterator it = network_vehicles.begin(); it != network_vehicles.end(); ++it)
+				{
+					if (it->second)
+					{
+						MovableObject* ob = it->second;
+						if (ob->iID == frame.iID) {
+							ob->if_selected = 1;
+						}
 
+					}
+				}
 			}
 			break;
 		}
@@ -843,19 +853,21 @@ void MessagesHandling(UINT message_type, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		case '3': {
-			acceptedOffer.fuel = othersOffer.fuel;
-			acceptedOffer.money = othersOffer.money;
+			
 			for (map<int, MovableObject*>::iterator it = network_vehicles.begin(); it != network_vehicles.end(); ++it)
 			{
 				if (it->second)
 				{
 					MovableObject* ob = it->second;
 					if (ob->if_selected) {
+						acceptedOffer.fuel = othersOffer.fuel;
+						acceptedOffer.money = othersOffer.money;
 						sendAccept(ob->iID, acceptedOffer.fuel, acceptedOffer.money);
 					}
 
 				}
 			}
+			break;
 		}
 		} // switch po klawiszach
 		
