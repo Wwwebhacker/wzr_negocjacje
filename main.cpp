@@ -205,8 +205,8 @@ void InteractionInitialisation()
 	VW_cycle_time = clock();             // pomiar aktualnego czasu
 
 	// obiekty sieciowe typu multicast (z podaniem adresu WZR oraz numeru portu)
-	multi_reciv = new multicast_net("224.10.120.65", 10001);      // Object do odbioru ramek sieciowych
-	multi_send = new multicast_net("224.10.120.65", 10001);       // Object do wysy³ania ramek
+	multi_reciv = new multicast_net("192.168.43.193", 10001);      // Object do odbioru ramek sieciowych
+	multi_send = new multicast_net("192.168.43.101", 10001);       // Object do wysy³ania ramek
 
 	// uruchomienie watku obslugujacego odbior komunikatow
 	threadReciv = CreateThread(
@@ -781,9 +781,7 @@ void MessagesHandling(UINT message_type, WPARAM wParam, LPARAM lParam)
 		}
 		case 'T': {
 
-			MessageBox(main_window, "Offer", "Caption", MB_OK);
-
-			break;
+		
 			for (map<int, MovableObject*>::iterator it = network_vehicles.begin(); it != network_vehicles.end(); ++it)
 			{
 				if (it->second)
