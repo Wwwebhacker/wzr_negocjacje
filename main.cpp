@@ -57,7 +57,7 @@ int cursor_x, cursor_y;                         // polo¿enie kursora myszki w c
 extern float TransferSending(int ID_receiver, int transfer_type, float transfer_value);
 
 enum frame_types {
-	OBJECT_STATE, ITEM_TAKING, ITEM_RENEWAL, COLLISION, TRANSFER, OFFER
+	OBJECT_STATE, ITEM_TAKING, ITEM_RENEWAL, COLLISION, TRANSFER, OFFER, ACCEPT_OFFER
 };
 
 enum transfer_types { MONEY, FUEL };
@@ -178,14 +178,31 @@ DWORD WINAPI ReceiveThreadFunction(void* ptr)
 			}
 			break;
 		}
-		case OFFER:
+		case OFFER: {
+
 			if (frame.iID_receiver == my_vehicle->iID)
 			{
-				//MessageBox(main_window, "Offer", "Caption", MB_OK);
-				my_vehicle->state.money = 999;
+				othersOffer.fuel = frame.fuel_offer;
+				othersOffer.money = frame.money_offer;
+
 			}
 			break;
-		} // switch po typach ramek
+		}
+		case ACCEPT_OFFER: {
+			if (frame.iID_receiver == my_vehicle->iID)
+			{
+				acceptedOffer.fuel = frame.fuel_offer;
+				acceptedOffer.money = frame.money_offer;
+
+			}
+			break;
+		}
+			
+		} 
+		
+		
+		
+		// switch po typach ramek
 		// Opuszczenie ścieżki krytycznej / Release the Critical section
 		LeaveCriticalSection(&m_cs);               // wyjście ze ścieżki krytycznej
 	}  // while(1)
@@ -220,6 +237,10 @@ void InteractionInitialisation()
 
 }
 
+struct Offer {
+	float money = 0.0f;
+	float fuel = 0.0f;
+}myOffer, othersOffer, acceptedOffer;
 
 // *****************************************************************
 // ****    Wszystko co trzeba zrobiæ w ka¿dym cyklu dzia³ania 
@@ -238,6 +259,9 @@ void VirtualWorldCycle()
 		if (fFps != 0) fDt = 1.0 / fFps; else fDt = 1;
 
 		sprintf(par_view.inscription1, " %0.0f_fps, fuel = %0.2f, money = %d,", fFps, my_vehicle->state.amount_of_fuel, my_vehicle->state.money);
+		sprintf(par_view.othersOffer, " | otherOffer:{ fuel: %0.2f,money: %0.2f }| ", othersOffer.fuel, othersOffer.money);
+		sprintf(par_view.myOffer, " | myOffer:{ fuel: %0.2f,money: %0.2f }| ", myOffer.fuel, myOffer.money);
+		sprintf(par_view.acceptedOffer, " | acceptedOffer:{ fuel: %0.2f,money: %0.2f }| ", acceptedOffer.fuel, acceptedOffer.money);
 		if (counter_of_simulations % 500 == 0) sprintf(par_view.inscription2, "");
 	}
 
@@ -351,6 +375,17 @@ void sendOffer(int ID_receiver, float fuel_offer, float money_offer)
 {
 	Frame frame;
 	frame.frame_type = OFFER;
+	frame.iID_receiver = ID_receiver;
+	frame.iID = my_vehicle->iID;
+	frame.fuel_offer = fuel_offer;
+	frame.money_offer = money_offer;
+
+	multi_send->send((char*)&frame, sizeof(Frame));
+}
+
+void sendAccept(int ID_receiver, float fuel_offer, float money_offer) {
+	Frame frame;
+	frame.frame_type = ACCEPT_OFFER;
 	frame.iID_receiver = ID_receiver;
 	frame.iID = my_vehicle->iID;
 	frame.fuel_offer = fuel_offer;
@@ -789,14 +824,27 @@ void MessagesHandling(UINT message_type, WPARAM wParam, LPARAM lParam)
 				{
 					MovableObject* ob = it->second;
 					if (ob->if_selected) {
-						sendOffer(ob->iID, 1, 1);
+						sendOffer(ob->iID, myOffer.fuel, myOffer.money);
 					}
 
 				}
 			}
 			break;
 		}
-
+		case '1': {
+			myOffer.fuel += 0.1;
+			myOffer.money += 0.11;
+			break;
+		}
+		case '2': {
+			myOffer.fuel -= 0.1;
+			myOffer.money -= 0.11;
+			break;
+		}
+		case '3': {
+			acceptedOffer.fuel = othersOffer.fuel;
+			acceptedOffer.money = othersOffer.money;
+		}
 		} // switch po klawiszach
 		
 

@@ -146,6 +146,9 @@ void DrawScene()
 	glTranslatef(-24, 24, -40);
 	glRasterPos2f(4.0, -4.0);
 	glPrint("%s", par_view.inscription1);
+	glPrint("%s", par_view.myOffer);
+	glPrint("%s", par_view.othersOffer);
+	glPrint("%s", par_view.acceptedOffer);
 	glPrint("%s", par_view.inscription2);
 	glLoadIdentity();
 
