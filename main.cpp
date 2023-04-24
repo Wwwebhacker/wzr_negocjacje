@@ -181,7 +181,8 @@ DWORD WINAPI ReceiveThreadFunction(void* ptr)
 		case OFFER:
 			if (frame.iID_receiver == my_vehicle->iID)
 			{
-				MessageBox(main_window, "Offer", "Caption", MB_OK);
+				//MessageBox(main_window, "Offer", "Caption", MB_OK);
+				my_vehicle->state.money = 999;
 			}
 			break;
 		} // switch po typach ramek
