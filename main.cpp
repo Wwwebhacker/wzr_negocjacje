@@ -183,7 +183,7 @@ DWORD WINAPI ReceiveThreadFunction(void* ptr)
 			{
 				MessageBox(main_window, "Offer", "Caption", MB_OK);
 			}
-
+			break;
 		} // switch po typach ramek
 		// Opuszczenie ścieżki krytycznej / Release the Critical section
 		LeaveCriticalSection(&m_cs);               // wyjście ze ścieżki krytycznej
