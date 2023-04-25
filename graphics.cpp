@@ -143,13 +143,19 @@ void DrawScene()
 
 	glLoadIdentity();
 	glClearColor(0.1, 0.1, 0.4, 0.7);   // ustawienie nieczarnego koloru tła
-	glTranslatef(-24, 24, -40);
+	glTranslatef(-30, 24, -40);
 	glRasterPos2f(4.0, -4.0);
 	glPrint("%s", par_view.inscription1);
+	glRasterPos2f(4.0, -5.0);
 	glPrint("%s", par_view.myOffer);
+	glRasterPos2f(4.0, -6.0);
 	glPrint("%s", par_view.othersOffer);
+	glRasterPos2f(4.0, -7.0);
 	glPrint("%s", par_view.acceptedOffer);
+	glRasterPos2f(4.0, -8.0);
 	glPrint("%s", par_view.inscription2);
+	glRasterPos2f(4.0, -9.0);
+	glPrint("%s", par_view.warning);
 	glLoadIdentity();
 
 

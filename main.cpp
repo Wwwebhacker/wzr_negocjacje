@@ -300,6 +300,7 @@ void VirtualWorldCycle()
 		sprintf(par_view.myOffer, " | myOffer:{ fuel: %0.2f,money: %0.2f,type: %s }| ", myOffer.fuel, myOffer.money, getOfferResourceString(myOffer));
 		sprintf(par_view.acceptedOffer, " | acceptedOffer:{ fuel: %0.2f,money: %0.2f,type: %s }| ", acceptedOffer.fuel, acceptedOffer.money,getOfferResourceString(acceptedOffer));
 		if (counter_of_simulations % 500 == 0) sprintf(par_view.inscription2, "");
+		if (counter_of_simulations % 500 == 0) sprintf(par_view.warning, "");
 	}
 
 	terrain.DeleteObjectsFromSectors(my_vehicle);
@@ -887,14 +888,22 @@ void MessagesHandling(UINT message_type, WPARAM wParam, LPARAM lParam)
 		}
 		case 'T': {
 
-		
+			
+
 			for (map<int, MovableObject*>::iterator it = network_vehicles.begin(); it != network_vehicles.end(); ++it)
 			{
 				if (it->second)
 				{
 					MovableObject* ob = it->second;
 					if (ob->if_selected) {
-						sendOffer(ob->iID, myOffer);
+						if (myOffer.fuel>0.5)
+						{
+							sendOffer(ob->iID, myOffer);
+
+						}
+						else {
+							sprintf(par_view.warning, "Oferta jest gownem");
+						}
 					}
 
 				}
