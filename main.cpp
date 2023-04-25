@@ -347,16 +347,18 @@ void VirtualWorldCycle()
 			case ITEM_COIN: {
 				if (acceptedOffer.money_maker_id == my_vehicle->iID)
 				{
-					my_vehicle->state.money -= item.value * acceptedOffer.money;
-					TransferSending(acceptedOffer.fuel_maker_id, MONEY, item.value * acceptedOffer.money);
+					float taking_value = (float)item.value * my_vehicle->money_collection_skills;
+					my_vehicle->state.money -= taking_value * acceptedOffer.money;
+					TransferSending(acceptedOffer.fuel_maker_id, MONEY, taking_value * acceptedOffer.money);
 				}
 				break;
 			}
 			case ITEM_BARREL: {
 				if (acceptedOffer.fuel_maker_id == my_vehicle->iID)
 				{
-					my_vehicle->state.amount_of_fuel -= item.value * acceptedOffer.fuel;
-					TransferSending(acceptedOffer.money_maker_id, FUEL, item.value * acceptedOffer.fuel);
+					float taking_value = (float)item.value * my_vehicle->fuel_collection_skills;
+					my_vehicle->state.amount_of_fuel -= taking_value * acceptedOffer.fuel;
+					TransferSending(acceptedOffer.money_maker_id, FUEL, taking_value * acceptedOffer.fuel);
 				}
 				break;
 			}
@@ -535,6 +537,14 @@ int WINAPI WinMain(HINSTANCE hInstance,
 	}
 
 	return (int)system_message.wParam;
+}
+
+bool isProfitableOffer(Offer offer) {
+	if ((offer.fuel>0) && (offer.money>0))
+	{
+		return true;
+	}
+	return false;
 }
 
 // ************************************************************************
@@ -896,13 +906,13 @@ void MessagesHandling(UINT message_type, WPARAM wParam, LPARAM lParam)
 				{
 					MovableObject* ob = it->second;
 					if (ob->if_selected) {
-						if (myOffer.fuel>0.5)
+						if (isProfitableOffer(myOffer))
 						{
 							sendOffer(ob->iID, myOffer);
 
 						}
 						else {
-							sprintf(par_view.warning, "Oferta jest gownem");
+							sprintf(par_view.warning, "Oferta \n jest \n gownem");
 						}
 					}
 
