@@ -248,8 +248,8 @@ void InteractionInitialisation()
 	VW_cycle_time = clock();             // pomiar aktualnego czasu
 
 	// obiekty sieciowe typu multicast (z podaniem adresu WZR oraz numeru portu)
-	multi_reciv = new multicast_net("192.168.43.193", 10001);      // Object do odbioru ramek sieciowych
-	multi_send = new multicast_net("192.168.43.101", 10001);       // Object do wysy³ania ramek
+	multi_reciv = new multicast_net("192.168.0.193", 10001);      // Object do odbioru ramek sieciowych
+	multi_send = new multicast_net("192.168.0.111", 10001);       // Object do wysy³ania ramek
 
 	// uruchomienie watku obslugujacego odbior komunikatow
 	threadReciv = CreateThread(
@@ -338,6 +338,32 @@ void VirtualWorldCycle()
 	// wziêcie przedmiotu -> wysy³anie ramki 
 	if (my_vehicle->number_of_taking_item > -1)
 	{
+		if (acceptedOffer.fuel_maker_id && acceptedOffer.money_maker_id)
+		{
+			Item item = terrain.p[my_vehicle->number_of_taking_item];
+			switch (item.type)
+			{
+			case ITEM_COIN: {
+				if (acceptedOffer.money_maker_id == my_vehicle->iID)
+				{
+					my_vehicle->state.money -= item.value * acceptedOffer.money;
+					TransferSending(acceptedOffer.fuel_maker_id, MONEY, item.value * acceptedOffer.money);
+				}
+				break;
+			}
+			case ITEM_BARREL: {
+				if (acceptedOffer.fuel_maker_id == my_vehicle->iID)
+				{
+					my_vehicle->state.amount_of_fuel -= item.value * acceptedOffer.fuel;
+					TransferSending(acceptedOffer.money_maker_id, FUEL, item.value * acceptedOffer.fuel);
+				}
+				break;
+			}
+			default:
+				break;
+			}
+		}
+
 		Frame frame;
 		frame.frame_type = ITEM_TAKING;
 		frame.item_number = my_vehicle->number_of_taking_item;
@@ -620,6 +646,10 @@ void MessagesHandling(UINT message_type, WPARAM wParam, LPARAM lParam)
 						sprintf(par_view.inscription2, "zaznaczono_ obiekt_ID_%d", network_vehicles[index_min]->iID);
 						myOffer.fuel_maker_id = network_vehicles[index_min]->iID;
 						myOffer.money_maker_id = my_vehicle->iID;
+					}
+					else {
+						myOffer.fuel_maker_id = NULL;
+						myOffer.money_maker_id = NULL;
 					}
 						
 				}
