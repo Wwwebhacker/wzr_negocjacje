@@ -934,8 +934,8 @@ void MessagesHandling(UINT message_type, WPARAM wParam, LPARAM lParam)
 				{
 					MovableObject* ob = it->second;
 					if (ob->if_selected) {
-						acceptedOffer.fuel = othersOffer.fuel;
-						acceptedOffer.money = othersOffer.money;
+						acceptedOffer = othersOffer;
+				
 						sendAccept(ob->iID, acceptedOffer);
 					}
 
