@@ -17,6 +17,7 @@ using namespace std;
 #include "objects.h"
 #include "graphics.h"
 #include "net.h"
+#include <string>
 
 
 bool if_different_skills = true;          // czy zró¿nicowanie umiejêtnoœci (dla ka¿dego pojazdu losowane s¹ umiejêtnoœci
@@ -69,7 +70,8 @@ enum transfer_types { MONEY, FUEL };
 struct Offer {
 	float money = 0.0f;
 	float fuel = 0.0f;
-	transfer_types type = MONEY;
+	int money_maker_id;
+	int fuel_maker_id;
 } myOffer, othersOffer, acceptedOffer;
 
 struct Frame
@@ -151,6 +153,7 @@ DWORD WINAPI ReceiveThreadFunction(void* ptr)
 		}
 		case ITEM_TAKING:            // frame informuj¹ca, ¿e ktoœ wzi¹³ przedmiot o podanym numerze
 		{
+			
 			// TODO here you should send money/fuel to your pal
 			state = frame.state;
 			if ((frame.item_number < terrain.number_of_items) && (frame.iID != my_vehicle->iID))
@@ -192,9 +195,8 @@ DWORD WINAPI ReceiveThreadFunction(void* ptr)
 
 			if (frame.iID_receiver == my_vehicle->iID)
 			{
-				othersOffer.fuel = frame.offer.fuel;
-				othersOffer.money = frame.offer.money;
-				othersOffer.type = frame.offer.type;
+				othersOffer = frame.offer;
+				
 				for (map<int, MovableObject*>::iterator it = network_vehicles.begin(); it != network_vehicles.end(); ++it)
 				{
 					if (it->second)
@@ -212,10 +214,11 @@ DWORD WINAPI ReceiveThreadFunction(void* ptr)
 		case ACCEPT_OFFER: {
 			if (frame.iID_receiver == my_vehicle->iID)
 			{
-				acceptedOffer.fuel = frame.offer.fuel;
-				acceptedOffer.money = frame.offer.money;
-				acceptedOffer.type = frame.offer.type;
-
+				acceptedOffer = frame.offer;
+				//acceptedOffer.fuel = frame.offer.fuel;
+				//acceptedOffer.money = frame.offer.money;
+				//acceptedOffer.fuel_maker_id = frame.offer.fuel_maker_id;
+				//acceptedOffer.money_maker_id = frame.offer.money_maker_id;
 			}
 			break;
 		}
@@ -259,6 +262,22 @@ void InteractionInitialisation()
 
 }
 
+char * getOfferResourceString(Offer offer) {
+	if ((offer.fuel_maker_id == NULL) && (offer.money_maker_id == NULL))
+	{
+		return "undefined";
+	}
+	if (offer.fuel_maker_id == my_vehicle->iID)
+	{
+		return "fuel";
+	}
+	if (offer.money_maker_id == my_vehicle->iID)
+	{
+		return "money";
+	}
+
+	return "undefined";
+}
 
 // *****************************************************************
 // ****    Wszystko co trzeba zrobiæ w ka¿dym cyklu dzia³ania 
@@ -277,9 +296,9 @@ void VirtualWorldCycle()
 		if (fFps != 0) fDt = 1.0 / fFps; else fDt = 1;
 
 		sprintf(par_view.inscription1, " %0.0f_fps, fuel = %0.2f, money = %d,", fFps, my_vehicle->state.amount_of_fuel, my_vehicle->state.money);
-		sprintf(par_view.othersOffer, " | otherOffer:{ fuel: %0.2f,money: %0.2f,type: %s }| ", othersOffer.fuel, othersOffer.money, othersOffer.type == MONEY ? "money" : "fuel");
-		sprintf(par_view.myOffer, " | myOffer:{ fuel: %0.2f,money: %0.2f,type: %s }| ", myOffer.fuel, myOffer.money, myOffer.type == MONEY ? "money" : "fuel");
-		sprintf(par_view.acceptedOffer, " | acceptedOffer:{ fuel: %0.2f,money: %0.2f,type: %s }| ", acceptedOffer.fuel, acceptedOffer.money, acceptedOffer.type == MONEY ? "money" : "fuel");
+		sprintf(par_view.othersOffer, " | otherOffer:{ fuel: %0.2f,money: %0.2f,type: %s }| ", othersOffer.fuel, othersOffer.money, getOfferResourceString(othersOffer));
+		sprintf(par_view.myOffer, " | myOffer:{ fuel: %0.2f,money: %0.2f,type: %s }| ", myOffer.fuel, myOffer.money, getOfferResourceString(myOffer));
+		sprintf(par_view.acceptedOffer, " | acceptedOffer:{ fuel: %0.2f,money: %0.2f,type: %s }| ", acceptedOffer.fuel, acceptedOffer.money,getOfferResourceString(acceptedOffer));
 		if (counter_of_simulations % 500 == 0) sprintf(par_view.inscription2, "");
 	}
 
@@ -597,8 +616,12 @@ void MessagesHandling(UINT message_type, WPARAM wParam, LPARAM lParam)
 				{
 					network_vehicles[index_min]->if_selected = 1 - network_vehicles[index_min]->if_selected;
 
-					if (network_vehicles[index_min]->if_selected)
+					if (network_vehicles[index_min]->if_selected) {
 						sprintf(par_view.inscription2, "zaznaczono_ obiekt_ID_%d", network_vehicles[index_min]->iID);
+						myOffer.fuel_maker_id = network_vehicles[index_min]->iID;
+						myOffer.money_maker_id = my_vehicle->iID;
+					}
+						
 				}
 				else
 				{
@@ -865,13 +888,14 @@ void MessagesHandling(UINT message_type, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		case 'I': {
-			myOffer.type = MONEY;
+			
+			int tmp = myOffer.money_maker_id;
+			myOffer.money_maker_id = myOffer.fuel_maker_id;
+			myOffer.fuel_maker_id = tmp;
+			 
 			break;
 		}
-		case 'K': {
-			myOffer.type = FUEL;
-			break;
-		}
+		
 		case '1': {
 			
 			for (map<int, MovableObject*>::iterator it = network_vehicles.begin(); it != network_vehicles.end(); ++it)
