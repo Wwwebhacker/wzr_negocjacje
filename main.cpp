@@ -540,7 +540,11 @@ int WINAPI WinMain(HINSTANCE hInstance,
 }
 
 bool isProfitableOffer(Offer offer) {
-	if ((offer.fuel > 0.1f) && (offer.money > 0.1f))
+	float fuel_skill = my_vehicle->fuel_collection_skills;
+	float money_skill = my_vehicle->money_collection_skills;
+
+	if ((offer.fuel > 0.1f) && (offer.money > 0.1f) &&
+		((offer.fuel > offer.money && fuel_skill > money_skill) || (offer.fuel < offer.money && fuel_skill < money_skill)))
 	{
 		return true;
 	}
