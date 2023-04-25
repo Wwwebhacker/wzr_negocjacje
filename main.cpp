@@ -540,7 +540,7 @@ int WINAPI WinMain(HINSTANCE hInstance,
 }
 
 bool isProfitableOffer(Offer offer) {
-	if ((offer.fuel>0) && (offer.money>0))
+	if ((offer.fuel > 0.1f) && (offer.money > 0.1f))
 	{
 		return true;
 	}
@@ -912,7 +912,7 @@ void MessagesHandling(UINT message_type, WPARAM wParam, LPARAM lParam)
 
 						}
 						else {
-							sprintf(par_view.warning, "Oferta \n jest \n gownem");
+							sprintf(par_view.warning, "Oferta nie jest dobra");
 						}
 					}
 
