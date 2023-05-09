@@ -114,12 +114,12 @@ void publishOffer(PublicOffer thisPublicOffer) {
 	publicOffer = thisPublicOffer;
 }
 
-void publicOfferNegotiate(PublicOffer publicOffer) {
+void publicOfferNegotiate(PublicOffer thisPublicOffer) {
 	Frame frame;
 	frame.frame_type = NEGOTIATE_OFFER;
 	frame.iID_receiver = publicOffer.publisher_id;
 	frame.iID = my_vehicle->iID;
-	frame.publicOffer = publicOffer;
+	frame.publicOffer = thisPublicOffer;
 	multi_send->send((char*)&frame, sizeof(Frame));
 }
 
@@ -1042,12 +1042,12 @@ void MessagesHandling(UINT message_type, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		case '3': {
-			PublicOffer publicOffer;
-			publicOffer.fuel = 3;
-			publicOffer.fuel_price = 3;
-			publicOffer.publisher_id = my_vehicle->iID;
-			publicOffer.offer_last_update = std::chrono::system_clock::now();
-			publicOfferNegotiate(publicOffer);
+			PublicOffer thisPublicOffer;
+			thisPublicOffer.fuel = 3;
+			thisPublicOffer.fuel_price = 3;
+			thisPublicOffer.publisher_id = my_vehicle->iID;
+			thisPublicOffer.offer_last_update = std::chrono::system_clock::now();
+			publicOfferNegotiate(thisPublicOffer);
 			break;
 		}
 		} // switch po klawiszach
