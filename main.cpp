@@ -81,7 +81,6 @@ struct PublicOffer {
 	float creator_id = NULL;
 	float publisher_id = NULL;
 	std::chrono::system_clock::time_point offer_last_update;
-	//bool isActive = false;
 }publicOffer, publicOfferSend;
 
 struct Frame
@@ -371,7 +370,7 @@ bool offerIsActive(PublicOffer offer) {
 }
 
 void contractResolve() {
-	if (publicOffer.creator_id == NULL)
+	if (!offerIsActive(publicOffer))
 	{
 		return;
 	}
@@ -412,6 +411,7 @@ void VirtualWorldCycle()
 		if (offerIsActive(publicOffer))
 		{
 			sprintf(par_view.publicOffer, " | publicOffer:{ fuel: %0.2f,fuel_price: %0.2f,seconds: %d }| ", publicOffer.fuel, publicOffer.fuel_price, getRemainingSeconds(publicOffer));
+			sprintf(par_view.publicOfferSend, " | publicOfferSend:{ fuel: %0.2f,fuel_price: %0.2f }| ", publicOfferSend.fuel, publicOfferSend.fuel_price);
 		}
 		else {
 			sprintf(par_view.publicOffer, "No offer");
@@ -648,6 +648,14 @@ bool isProfitableOffer(Offer offer) {
 		return true;
 	}
 	return false;
+}
+
+PublicOffer* getPublicOfferToEdit() {
+	if (offerIsActive(publicOffer))
+	{
+		return &publicOfferSend;
+	}
+	return &publicOffer;
 }
 
 // ************************************************************************
@@ -1087,6 +1095,24 @@ void MessagesHandling(UINT message_type, WPARAM wParam, LPARAM lParam)
 			thisPublicOffer.offer_last_update = std::chrono::system_clock::now();
 			thisPublicOffer.creator_id = publicOffer.creator_id;
 			publicOfferNegotiate(thisPublicOffer);
+			break;
+		}
+		case '4': {
+	
+			(*getPublicOfferToEdit()).fuel += 0.1;
+		
+			break;
+		}
+		case '5': {
+			(*getPublicOfferToEdit()).fuel -= 0.1;
+			break;
+		}
+		case '6': {
+			(*getPublicOfferToEdit()).fuel_price += 0.1;
+			break;
+		}
+		case '7': {
+			(*getPublicOfferToEdit()).fuel_price -= 0.1;
 			break;
 		}
 		} // switch po klawiszach
