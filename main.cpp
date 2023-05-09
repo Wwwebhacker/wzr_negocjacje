@@ -1045,7 +1045,7 @@ void MessagesHandling(UINT message_type, WPARAM wParam, LPARAM lParam)
 			PublicOffer thisPublicOffer;
 			thisPublicOffer.fuel = 3;
 			thisPublicOffer.fuel_price = 3;
-			thisPublicOffer.publisher_id = my_vehicle->iID;
+			thisPublicOffer.publisher_id = publicOffer.publisher_id;
 			thisPublicOffer.offer_last_update = std::chrono::system_clock::now();
 			publicOfferNegotiate(thisPublicOffer);
 			break;
