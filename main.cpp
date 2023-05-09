@@ -405,11 +405,11 @@ void VirtualWorldCycle()
 		sprintf(par_view.acceptedOffer, " | acceptedOffer:{ fuel: %0.2f,money: %0.2f,type: %s }| ", acceptedOffer.fuel, acceptedOffer.money,getOfferResourceString(acceptedOffer));
 		if (offerIsActive(publicOffer))
 		{
-			sprintf(par_view.publicOffer, " | publicOffer:{ fuel: %0.2f,fuel_price: %0.2f,seconds: %d }| ", publicOffer.fuel, publicOffer.fuel_price, getRemainingSeconds(publicOffer));
+			sprintf(par_view.publicOffer, "Current Offer | publicOffer:{ fuel: %0.2f,fuel_price: %0.2f,seconds: %d }| ", publicOffer.fuel, publicOffer.fuel_price, getRemainingSeconds(publicOffer));
 			sprintf(par_view.publicOfferSend, " | publicOfferSend:{ fuel: %0.2f,fuel_price: %0.2f }| ", publicOfferSend.fuel, publicOfferSend.fuel_price);
 		}
 		else {
-			sprintf(par_view.publicOffer, "No offer");
+			sprintf(par_view.publicOffer, "New Offer | publicOffer:{ fuel: %0.2f,fuel_price: %0.2f,seconds: %d }| ", publicOffer.fuel, publicOffer.fuel_price, getRemainingSeconds(publicOffer));
 			contractResolve();
 		}
 
