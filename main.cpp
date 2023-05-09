@@ -18,7 +18,7 @@ using namespace std;
 #include "graphics.h"
 #include "net.h"
 #include <string>
-
+#include <chrono>
 
 bool if_different_skills = true;          // czy zró¿nicowanie umiejêtnoœci (dla ka¿dego pojazdu losowane s¹ umiejêtnoœci
 // zbierania gotówki i paliwa)
@@ -58,7 +58,7 @@ int cursor_x, cursor_y;                         // polo¿enie kursora myszki w c
 extern float TransferSending(int ID_receiver, int transfer_type, float transfer_value);
 
 enum frame_types {
-	OBJECT_STATE, ITEM_TAKING, ITEM_RENEWAL, COLLISION, TRANSFER, OFFER, ACCEPT_OFFER
+	OBJECT_STATE, ITEM_TAKING, ITEM_RENEWAL, COLLISION, TRANSFER, OFFER, ACCEPT_OFFER, PUBLISH_OFFER
 };
 
 
@@ -73,6 +73,14 @@ struct Offer {
 	int money_maker_id;
 	int fuel_maker_id;
 } myOffer, othersOffer, acceptedOffer;
+
+struct PublicOffer {
+	float fuel = 0.0f;
+	float fuel_price = 10.0f;
+	float publisher_id = NULL;
+	std::chrono::system_clock::time_point offer_last_update;
+	//bool isActive = false;
+}publicOffer, publicOfferSend;
 
 struct Frame
 {
@@ -91,6 +99,7 @@ struct Frame
 	int team_number;
 
 	Offer offer;
+	PublicOffer publicOffer;
 
 	long existing_time;        // czas jaki uplyn¹³ od uruchomienia programu
 };
@@ -222,7 +231,9 @@ DWORD WINAPI ReceiveThreadFunction(void* ptr)
 			}
 			break;
 		}
-			
+		case PUBLISH_OFFER: {
+			publicOffer = frame.publicOffer;
+		}
 		} 
 		
 		
@@ -248,8 +259,8 @@ void InteractionInitialisation()
 	VW_cycle_time = clock();             // pomiar aktualnego czasu
 
 	// obiekty sieciowe typu multicast (z podaniem adresu WZR oraz numeru portu)
-	multi_reciv = new multicast_net("192.168.0.123", 10001);      // Object do odbioru ramek sieciowych
-	multi_send = new multicast_net("192.168.0.111", 10001);       // Object do wysy³ania ramek
+	multi_reciv = new multicast_net("192.168.43.193", 10001);      // Object do odbioru ramek sieciowych
+	multi_send = new multicast_net("192.168.43.101", 10001);       // Object do wysy³ania ramek
 
 	// uruchomienie watku obslugujacego odbior komunikatow
 	threadReciv = CreateThread(
@@ -279,6 +290,22 @@ char * getOfferResourceString(Offer offer) {
 	return "undefined";
 }
 
+
+
+long getRemainingSeconds(PublicOffer offer) {
+
+	auto end_time = std::chrono::system_clock::now();
+	return std::chrono::duration_cast<std::chrono::seconds>(end_time - offer.offer_last_update).count();
+}
+
+bool offerIsActive(PublicOffer offer) {
+	if (getRemainingSeconds(offer)<8)
+	{
+		return true;
+	}
+	return false;
+}
+
 // *****************************************************************
 // ****    Wszystko co trzeba zrobiæ w ka¿dym cyklu dzia³ania 
 // ****    aplikacji poza grafik¹ 
@@ -299,6 +326,14 @@ void VirtualWorldCycle()
 		sprintf(par_view.othersOffer, " | otherOffer:{ fuel: %0.2f,money: %0.2f,type: %s }| ", othersOffer.fuel, othersOffer.money, getOfferResourceString(othersOffer));
 		sprintf(par_view.myOffer, " | myOffer:{ fuel: %0.2f,money: %0.2f,type: %s }| ", myOffer.fuel, myOffer.money, getOfferResourceString(myOffer));
 		sprintf(par_view.acceptedOffer, " | acceptedOffer:{ fuel: %0.2f,money: %0.2f,type: %s }| ", acceptedOffer.fuel, acceptedOffer.money,getOfferResourceString(acceptedOffer));
+		if (offerIsActive(publicOffer))
+		{
+			sprintf(par_view.publicOffer, " | publicOffer:{ fuel: %0.2f,fuel_price: %0.2f,seconds: %d }| ", publicOffer.fuel, publicOffer.fuel_price, getRemainingSeconds(publicOffer));
+		}
+		else {
+			sprintf(par_view.publicOffer, "No offer");
+		}
+
 		if (counter_of_simulations % 500 == 0) sprintf(par_view.inscription2, "");
 		if (counter_of_simulations % 500 == 0) sprintf(par_view.warning, "");
 	}
@@ -436,6 +471,14 @@ float TransferSending(int ID_receiver, int transfer_type, float transfer_value)
 	return frame.transfer_value;
 }
 
+void publishOffer(PublicOffer publicOffer) {
+	Frame frame;
+	frame.frame_type = PUBLISH_OFFER;
+	frame.iID = my_vehicle->iID;
+	frame.publicOffer = publicOffer;
+	multi_send->send((char*)&frame, sizeof(Frame));
+
+}
 
 void sendOffer(int ID_receiver, Offer offer)
 {
@@ -965,6 +1008,14 @@ void MessagesHandling(UINT message_type, WPARAM wParam, LPARAM lParam)
 				}
 			}
 			break;
+		}
+		case '2': {
+			PublicOffer publicOffer;
+			publicOffer.fuel = 10;
+			publicOffer.fuel_price = 10;
+			publicOffer.publisher_id = my_vehicle->iID;
+			publicOffer.offer_last_update = std::chrono::system_clock::now();
+			publishOffer(publicOffer);
 		}
 		} // switch po klawiszach
 		
