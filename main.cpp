@@ -42,7 +42,7 @@ HANDLE threadReciv;                 // uchwyt w¹tku odbioru komunikatów
 extern HWND main_window;
 CRITICAL_SECTION m_cs;               // do synchronizacji wątków
 
-int OFFER_TIME = 10;
+int OFFER_TIME = 15;
 bool SHIFT_pressed = 0;
 bool CTRL_pressed = 0;
 bool ALT_pressed = 0;
