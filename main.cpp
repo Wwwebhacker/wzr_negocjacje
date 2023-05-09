@@ -81,6 +81,7 @@ struct PublicOffer {
 	float creator_id = NULL;
 	float publisher_id = NULL;
 	std::chrono::system_clock::time_point offer_last_update;
+	bool done = false;
 }publicOffer, publicOfferSend;
 
 struct Frame
@@ -370,7 +371,10 @@ bool offerIsActive(PublicOffer offer) {
 }
 
 void contractResolve() {
-
+	if (publicOffer.done)
+	{
+		return;
+	}
 	if (publicOffer.creator_id != my_vehicle->iID)
 	{
 		return;
@@ -1087,6 +1091,7 @@ void MessagesHandling(UINT message_type, WPARAM wParam, LPARAM lParam)
 			publicOffer.creator_id = my_vehicle->iID;
 			publicOffer.publisher_id = my_vehicle->iID;
 			publicOffer.offer_last_update = std::chrono::system_clock::now();
+			publicOffer.done = false;
 			publishOffer(publicOffer);
 			break;
 		}
@@ -1099,6 +1104,7 @@ void MessagesHandling(UINT message_type, WPARAM wParam, LPARAM lParam)
 			publicOfferSend.publisher_id = my_vehicle->iID;
 			publicOfferSend.offer_last_update = std::chrono::system_clock::now();
 			publicOfferSend.creator_id = publicOffer.creator_id;
+			publicOfferSend.done = false;
 			publicOfferNegotiate(publicOfferSend);
 			break;
 		}
