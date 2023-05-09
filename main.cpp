@@ -59,7 +59,7 @@ int cursor_x, cursor_y;                         // polo¿enie kursora myszki w c
 extern float TransferSending(int ID_receiver, int transfer_type, float transfer_value);
 
 enum frame_types {
-	OBJECT_STATE, ITEM_TAKING, ITEM_RENEWAL, COLLISION, TRANSFER, OFFER, ACCEPT_OFFER, PUBLISH_OFFER
+	OBJECT_STATE, ITEM_TAKING, ITEM_RENEWAL, COLLISION, TRANSFER, OFFER, ACCEPT_OFFER, PUBLISH_OFFER, NEGOTIATE_OFFER
 };
 
 
@@ -235,6 +235,13 @@ DWORD WINAPI ReceiveThreadFunction(void* ptr)
 		case PUBLISH_OFFER: {
 			publicOffer = frame.publicOffer;
 		}
+		case NEGOTIATE_OFFER: {
+			if (frame.iID_receiver == my_vehicle->iID)
+			{
+				publicOffer = frame.publicOffer;
+				publishOffer(publicOffer);
+			}
+		}
 		} 
 		
 		
@@ -260,8 +267,8 @@ void InteractionInitialisation()
 	VW_cycle_time = clock();             // pomiar aktualnego czasu
 
 	// obiekty sieciowe typu multicast (z podaniem adresu WZR oraz numeru portu)
-	multi_reciv = new multicast_net("192.168.0.111", 10001);      // Object do odbioru ramek sieciowych
-	multi_send = new multicast_net("192.168.0.123", 10001);       // Object do wysy³ania ramek
+	multi_reciv = new multicast_net("192.168.0.123", 10001);      // Object do odbioru ramek sieciowych
+	multi_send = new multicast_net("192.168.0.111", 10001);       // Object do wysy³ania ramek
 
 	// uruchomienie watku obslugujacego odbior komunikatow
 	threadReciv = CreateThread(
@@ -479,6 +486,15 @@ void publishOffer(PublicOffer publicOffer) {
 	frame.publicOffer = publicOffer;
 	multi_send->send((char*)&frame, sizeof(Frame));
 
+}
+
+void publicOfferNegotiate( PublicOffer publicOffer) {
+	Frame frame;
+	frame.frame_type = NEGOTIATE_OFFER;
+	frame.iID_receiver = publicOffer.publisher_id;
+	frame.iID = my_vehicle->iID;
+	frame.publicOffer = publicOffer;
+	multi_send->send((char*)&frame, sizeof(Frame));
 }
 
 void sendOffer(int ID_receiver, Offer offer)
@@ -1011,12 +1027,26 @@ void MessagesHandling(UINT message_type, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		case '2': {
+			if (offerIsActive(publicOffer))
+			{
+				break;
+			}
 			PublicOffer publicOffer;
 			publicOffer.fuel = 10;
 			publicOffer.fuel_price = 10;
 			publicOffer.publisher_id = my_vehicle->iID;
 			publicOffer.offer_last_update = std::chrono::system_clock::now();
 			publishOffer(publicOffer);
+			break;
+		}
+		case '3': {
+			PublicOffer publicOffer;
+			publicOffer.fuel = 3;
+			publicOffer.fuel_price = 3;
+			publicOffer.publisher_id = my_vehicle->iID;
+			publicOffer.offer_last_update = std::chrono::system_clock::now();
+			publicOfferNegotiate(publicOffer);
+			break;
 		}
 		} // switch po klawiszach
 		
