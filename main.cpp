@@ -118,7 +118,7 @@ void publishOffer(PublicOffer thisPublicOffer) {
 void publicOfferNegotiate(PublicOffer thisPublicOffer) {
 	Frame frame;
 	frame.frame_type = NEGOTIATE_OFFER;
-	frame.iID_receiver = publicOffer.publisher_id;
+	frame.iID_receiver = publicOffer.creator_id;
 	frame.iID = my_vehicle->iID;
 	frame.publicOffer = thisPublicOffer;
 	multi_send->send((char*)&frame, sizeof(Frame));
