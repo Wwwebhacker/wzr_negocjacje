@@ -355,6 +355,24 @@ bool offerIsActive(PublicOffer offer) {
 	return false;
 }
 
+void contractResolve() {
+	if (publicOffer.creator_id == NULL)
+	{
+		return;
+	}
+
+	if (publicOffer.creator_id != my_vehicle->iID)
+	{
+		return;
+	}
+	if (publicOffer.creator_id == publicOffer.publisher_id)
+	{
+		return;
+	}
+	TransferSending(publicOffer.publisher_id, MONEY, publicOffer.fuel * publicOffer.fuel_price);
+	publicOffer.creator_id = NULL;
+}
+
 // *****************************************************************
 // ****    Wszystko co trzeba zrobiæ w ka¿dym cyklu dzia³ania 
 // ****    aplikacji poza grafik¹ 
@@ -381,10 +399,12 @@ void VirtualWorldCycle()
 		}
 		else {
 			sprintf(par_view.publicOffer, "No offer");
+			contractResolve();
 		}
 
 		if (counter_of_simulations % 500 == 0) sprintf(par_view.inscription2, "");
 		if (counter_of_simulations % 500 == 0) sprintf(par_view.warning, "");
+
 	}
 
 	terrain.DeleteObjectsFromSectors(my_vehicle);
