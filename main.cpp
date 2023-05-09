@@ -383,6 +383,16 @@ void contractResolve() {
 	sendForceTransfer(publicOffer.publisher_id, publicOffer.fuel);
 }
 
+
+bool isGoodOffer() {
+	if (publicOfferSend.fuel > publicOffer.fuel)
+	{
+		return true;
+	}
+
+	return false;
+}
+
 // *****************************************************************
 // ****    Wszystko co trzeba zrobiæ w ka¿dym cyklu dzia³ania 
 // ****    aplikacji poza grafik¹ 
@@ -406,10 +416,10 @@ void VirtualWorldCycle()
 		if (offerIsActive(publicOffer))
 		{
 			sprintf(par_view.publicOffer, "Current Offer | publicOffer:{ fuel: %0.2f,fuel_price: %0.2f,seconds: %d }| ", publicOffer.fuel, publicOffer.fuel_price, getRemainingSeconds(publicOffer));
-			sprintf(par_view.publicOfferSend, " | publicOfferSend:{ fuel: %0.2f,fuel_price: %0.2f }| ", publicOfferSend.fuel, publicOfferSend.fuel_price);
+			sprintf(par_view.publicOfferSend, "%s | publicOfferSend:{ fuel: %0.2f,fuel_price: %0.2f }| ", isGoodOffer() ?  "goodOffer" : "badOffer", publicOfferSend.fuel, publicOfferSend.fuel_price);
 		}
 		else {
-			sprintf(par_view.publicOffer, "New Offer | publicOffer:{ fuel: %0.2f,fuel_price: %0.2f,seconds: %d }| ", publicOffer.fuel, publicOffer.fuel_price, getRemainingSeconds(publicOffer));
+			sprintf(par_view.publicOffer, "New Offer | publicOffer:{ fuel: %0.2f,fuel_price: %0.2f }| ", publicOffer.fuel, publicOffer.fuel_price);
 			contractResolve();
 		}
 
@@ -1081,6 +1091,10 @@ void MessagesHandling(UINT message_type, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		case '3': {
+			if (!isGoodOffer())
+			{
+				return;
+			}
 			
 			publicOfferSend.publisher_id = my_vehicle->iID;
 			publicOfferSend.offer_last_update = std::chrono::system_clock::now();
@@ -1089,9 +1103,7 @@ void MessagesHandling(UINT message_type, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		case '4': {
-	
 			(*getPublicOfferToEdit()).fuel += 0.1;
-		
 			break;
 		}
 		case '5': {
