@@ -105,7 +105,45 @@ struct Frame
 	long existing_time;        // czas jaki uplyn¹³ od uruchomienia programu
 };
 
+void publishOffer(PublicOffer publicOffer) {
+	Frame frame;
+	frame.frame_type = PUBLISH_OFFER;
+	frame.iID = my_vehicle->iID;
+	frame.publicOffer = publicOffer;
+	multi_send->send((char*)&frame, sizeof(Frame));
 
+}
+
+void publicOfferNegotiate(PublicOffer publicOffer) {
+	Frame frame;
+	frame.frame_type = NEGOTIATE_OFFER;
+	frame.iID_receiver = publicOffer.publisher_id;
+	frame.iID = my_vehicle->iID;
+	frame.publicOffer = publicOffer;
+	multi_send->send((char*)&frame, sizeof(Frame));
+}
+
+void sendOffer(int ID_receiver, Offer offer)
+{
+	Frame frame;
+	frame.frame_type = OFFER;
+	frame.iID_receiver = ID_receiver;
+	frame.iID = my_vehicle->iID;
+	frame.offer = offer;
+
+
+	multi_send->send((char*)&frame, sizeof(Frame));
+}
+
+void sendAccept(int ID_receiver, Offer offer) {
+	Frame frame;
+	frame.frame_type = ACCEPT_OFFER;
+	frame.iID_receiver = ID_receiver;
+	frame.iID = my_vehicle->iID;
+	frame.offer = offer;
+
+	multi_send->send((char*)&frame, sizeof(Frame));
+}
 //******************************************
 // Funkcja obs³ugi w¹tku odbioru komunikatów 
 DWORD WINAPI ReceiveThreadFunction(void* ptr)
@@ -479,45 +517,7 @@ float TransferSending(int ID_receiver, int transfer_type, float transfer_value)
 	return frame.transfer_value;
 }
 
-void publishOffer(PublicOffer publicOffer) {
-	Frame frame;
-	frame.frame_type = PUBLISH_OFFER;
-	frame.iID = my_vehicle->iID;
-	frame.publicOffer = publicOffer;
-	multi_send->send((char*)&frame, sizeof(Frame));
 
-}
-
-void publicOfferNegotiate( PublicOffer publicOffer) {
-	Frame frame;
-	frame.frame_type = NEGOTIATE_OFFER;
-	frame.iID_receiver = publicOffer.publisher_id;
-	frame.iID = my_vehicle->iID;
-	frame.publicOffer = publicOffer;
-	multi_send->send((char*)&frame, sizeof(Frame));
-}
-
-void sendOffer(int ID_receiver, Offer offer)
-{
-	Frame frame;
-	frame.frame_type = OFFER;
-	frame.iID_receiver = ID_receiver;
-	frame.iID = my_vehicle->iID;
-	frame.offer = offer;
-	
-
-	multi_send->send((char*)&frame, sizeof(Frame));
-}
-
-void sendAccept(int ID_receiver, Offer offer) {
-	Frame frame;
-	frame.frame_type = ACCEPT_OFFER;
-	frame.iID_receiver = ID_receiver;
-	frame.iID = my_vehicle->iID;
-	frame.offer = offer;
-
-	multi_send->send((char*)&frame, sizeof(Frame));
-}
 
 
 
