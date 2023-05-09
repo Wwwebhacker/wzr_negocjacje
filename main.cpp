@@ -78,6 +78,7 @@ struct Offer {
 struct PublicOffer {
 	float fuel = 0.0f;
 	float fuel_price = 10.0f;
+	float creator_id = NULL;
 	float publisher_id = NULL;
 	std::chrono::system_clock::time_point offer_last_update;
 	//bool isActive = false;
@@ -1033,20 +1034,22 @@ void MessagesHandling(UINT message_type, WPARAM wParam, LPARAM lParam)
 			{
 				break;
 			}
-			PublicOffer publicOffer;
-			publicOffer.fuel = 10;
-			publicOffer.fuel_price = 10;
-			publicOffer.publisher_id = my_vehicle->iID;
-			publicOffer.offer_last_update = std::chrono::system_clock::now();
-			publishOffer(publicOffer);
+			PublicOffer thisPublicOffer;
+			thisPublicOffer.fuel = 10;
+			thisPublicOffer.fuel_price = 10;
+			thisPublicOffer.creator_id = my_vehicle->iID;
+			thisPublicOffer.publisher_id = my_vehicle->iID;
+			thisPublicOffer.offer_last_update = std::chrono::system_clock::now();
+			publishOffer(thisPublicOffer);
 			break;
 		}
 		case '3': {
-			PublicOffer thisPublicOffer;
+			PublicOffer thisPublicOffer ;
 			thisPublicOffer.fuel = 3;
 			thisPublicOffer.fuel_price = 3;
-			thisPublicOffer.publisher_id = publicOffer.publisher_id;
+			thisPublicOffer.publisher_id = my_vehicle->iID;
 			thisPublicOffer.offer_last_update = std::chrono::system_clock::now();
+			thisPublicOffer.creator_id = publicOffer.creator_id;
 			publicOfferNegotiate(thisPublicOffer);
 			break;
 		}
