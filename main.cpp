@@ -59,7 +59,7 @@ int cursor_x, cursor_y;                         // polo¿enie kursora myszki w c
 extern float TransferSending(int ID_receiver, int transfer_type, float transfer_value);
 
 enum frame_types {
-	OBJECT_STATE, ITEM_TAKING, ITEM_RENEWAL, COLLISION, TRANSFER, OFFER, ACCEPT_OFFER, PUBLISH_OFFER, NEGOTIATE_OFFER
+	OBJECT_STATE, ITEM_TAKING, ITEM_RENEWAL, COLLISION, TRANSFER, OFFER, ACCEPT_OFFER, PUBLISH_OFFER, NEGOTIATE_OFFER, FORCE_TRANSACTION
 };
 
 
@@ -143,6 +143,14 @@ void sendAccept(int ID_receiver, Offer offer) {
 	frame.iID = my_vehicle->iID;
 	frame.offer = offer;
 
+	multi_send->send((char*)&frame, sizeof(Frame));
+}
+void sendForceTransfer(int ID_receiver, float transfer_value) {
+	Frame frame;
+	frame.frame_type = FORCE_TRANSACTION;
+	frame.iID_receiver = ID_receiver;
+	frame.transfer_value = transfer_value;
+	frame.iID = my_vehicle->iID;
 	multi_send->send((char*)&frame, sizeof(Frame));
 }
 //******************************************
@@ -280,6 +288,13 @@ DWORD WINAPI ReceiveThreadFunction(void* ptr)
 			{
 				publicOffer = frame.publicOffer;
 				publishOffer(publicOffer);
+			}
+			break;
+		}
+		case FORCE_TRANSACTION: {
+			if (frame.iID_receiver == my_vehicle->iID)
+			{
+				TransferSending(frame.iID, FUEL, frame.transfer_value);
 			}
 			break;
 		}
