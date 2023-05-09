@@ -1073,13 +1073,11 @@ void MessagesHandling(UINT message_type, WPARAM wParam, LPARAM lParam)
 			{
 				break;
 			}
-			PublicOffer thisPublicOffer;
-			thisPublicOffer.fuel = 10;
-			thisPublicOffer.fuel_price = 10;
-			thisPublicOffer.creator_id = my_vehicle->iID;
-			thisPublicOffer.publisher_id = my_vehicle->iID;
-			thisPublicOffer.offer_last_update = std::chrono::system_clock::now();
-			publishOffer(thisPublicOffer);
+			
+			publicOffer.creator_id = my_vehicle->iID;
+			publicOffer.publisher_id = my_vehicle->iID;
+			publicOffer.offer_last_update = std::chrono::system_clock::now();
+			publishOffer(publicOffer);
 			break;
 		}
 		case '3': {
