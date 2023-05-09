@@ -385,6 +385,7 @@ void contractResolve() {
 	}
 	TransferSending(publicOffer.publisher_id, MONEY, publicOffer.fuel * publicOffer.fuel_price);
 	sendForceTransfer(publicOffer.publisher_id, publicOffer.fuel);
+	publicOffer.done = true;
 }
 
 
