@@ -370,10 +370,6 @@ bool offerIsActive(PublicOffer offer) {
 }
 
 void contractResolve() {
-	if (!offerIsActive(publicOffer))
-	{
-		return;
-	}
 
 	if (publicOffer.creator_id != my_vehicle->iID)
 	{
@@ -384,7 +380,6 @@ void contractResolve() {
 		return;
 	}
 	TransferSending(publicOffer.publisher_id, MONEY, publicOffer.fuel * publicOffer.fuel_price);
-	publicOffer.creator_id = NULL;
 	sendForceTransfer(publicOffer.publisher_id, publicOffer.fuel);
 }
 
