@@ -42,6 +42,7 @@ HANDLE threadReciv;                 // uchwyt w¹tku odbioru komunikatów
 extern HWND main_window;
 CRITICAL_SECTION m_cs;               // do synchronizacji wątków
 
+int OFFER_TIME = 10;
 bool SHIFT_pressed = 0;
 bool CTRL_pressed = 0;
 bool ALT_pressed = 0;
@@ -259,8 +260,8 @@ void InteractionInitialisation()
 	VW_cycle_time = clock();             // pomiar aktualnego czasu
 
 	// obiekty sieciowe typu multicast (z podaniem adresu WZR oraz numeru portu)
-	multi_reciv = new multicast_net("192.168.43.193", 10001);      // Object do odbioru ramek sieciowych
-	multi_send = new multicast_net("192.168.43.101", 10001);       // Object do wysy³ania ramek
+	multi_reciv = new multicast_net("192.168.0.111", 10001);      // Object do odbioru ramek sieciowych
+	multi_send = new multicast_net("192.168.0.123", 10001);       // Object do wysy³ania ramek
 
 	// uruchomienie watku obslugujacego odbior komunikatow
 	threadReciv = CreateThread(
@@ -295,11 +296,11 @@ char * getOfferResourceString(Offer offer) {
 long getRemainingSeconds(PublicOffer offer) {
 
 	auto end_time = std::chrono::system_clock::now();
-	return std::chrono::duration_cast<std::chrono::seconds>(end_time - offer.offer_last_update).count();
+	return OFFER_TIME - std::chrono::duration_cast<std::chrono::seconds>(end_time - offer.offer_last_update).count();
 }
 
 bool offerIsActive(PublicOffer offer) {
-	if (getRemainingSeconds(offer)<8)
+	if (getRemainingSeconds(offer) > 0)
 	{
 		return true;
 	}
