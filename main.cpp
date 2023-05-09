@@ -105,13 +105,13 @@ struct Frame
 	long existing_time;        // czas jaki uplyn¹³ od uruchomienia programu
 };
 
-void publishOffer(PublicOffer publicOffer) {
+void publishOffer(PublicOffer thisPublicOffer) {
 	Frame frame;
 	frame.frame_type = PUBLISH_OFFER;
 	frame.iID = my_vehicle->iID;
-	frame.publicOffer = publicOffer;
+	frame.publicOffer = thisPublicOffer;
 	multi_send->send((char*)&frame, sizeof(Frame));
-
+	publicOffer = thisPublicOffer;
 }
 
 void publicOfferNegotiate(PublicOffer publicOffer) {
@@ -272,6 +272,7 @@ DWORD WINAPI ReceiveThreadFunction(void* ptr)
 		}
 		case PUBLISH_OFFER: {
 			publicOffer = frame.publicOffer;
+			break;
 		}
 		case NEGOTIATE_OFFER: {
 			if (frame.iID_receiver == my_vehicle->iID)
@@ -279,6 +280,7 @@ DWORD WINAPI ReceiveThreadFunction(void* ptr)
 				publicOffer = frame.publicOffer;
 				publishOffer(publicOffer);
 			}
+			break;
 		}
 		} 
 		
